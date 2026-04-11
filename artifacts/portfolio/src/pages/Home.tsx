@@ -101,22 +101,18 @@ export default function Home() {
       });
       const data: SmsResponse = await res.json();
 
-      let lastCycle = -1;
       const apisPerCycle = data.totalApis / cycles;
+      const firstCycleResults = data.results.slice(0, apisPerCycle);
 
-      data.results.forEach((r, i) => {
-        const cycle = Math.floor(i / apisPerCycle);
-        if (cycle !== lastCycle) {
-          if (lastCycle !== -1) append("─".repeat(50));
-          append(`[ CYCLE ${cycle + 1}/${cycles} ]`);
-          lastCycle = cycle;
-        }
+      firstCycleResults.forEach((r) => {
         const status = r.success ? "[ ✓ OK ]  " : "[ ✗ FAIL ]";
         append(`  ${status} ${r.name}`);
       });
 
+      const firstSuccess = firstCycleResults.filter((r) => r.success).length;
+      const firstFail = firstCycleResults.filter((r) => !r.success).length;
       append("─".repeat(50));
-      append(`[ DONE ] Success: ${data.successCount} | Failed: ${data.failCount} | Total: ${data.totalApis}`);
+      append(`[ DONE ] Success: ${firstSuccess} | Failed: ${firstFail} | Total: ${apisPerCycle}`);
     } catch (e: unknown) {
       append(`[ ERROR ] ${e instanceof Error ? e.message : "Request failed"}`);
     } finally {
@@ -209,12 +205,6 @@ export default function Home() {
           {output}
         </div>
 
-        <div style={{
-          marginTop: 16, textAlign: "center",
-          color: "rgba(0,255,191,0.4)", fontSize: 12,
-        }}>
-          Total APIs: 49 | For educational purposes only
-        </div>
       </div>
     </>
   );
