@@ -5,18 +5,21 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type { HealthStatus, SmsSendBody, SmsSendResult } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -25,7 +28,6 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const getHealthCheckUrl = () => {
@@ -99,3 +101,89 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Send SMS to phone via all APIs
+ */
+export const getSmsSendUrl = () => {
+  return `/api/sms/send`;
+};
+
+export const smsSend = async (
+  smsSendBody: SmsSendBody,
+  options?: RequestInit,
+): Promise<SmsSendResult> => {
+  return customFetch<SmsSendResult>(getSmsSendUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(smsSendBody),
+  });
+};
+
+export const getSmsSendMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof smsSend>>,
+    TError,
+    { data: BodyType<SmsSendBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof smsSend>>,
+  TError,
+  { data: BodyType<SmsSendBody> },
+  TContext
+> => {
+  const mutationKey = ["smsSend"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof smsSend>>,
+    { data: BodyType<SmsSendBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return smsSend(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SmsSendMutationResult = NonNullable<
+  Awaited<ReturnType<typeof smsSend>>
+>;
+export type SmsSendMutationBody = BodyType<SmsSendBody>;
+export type SmsSendMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Send SMS to phone via all APIs
+ */
+export const useSmsSend = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof smsSend>>,
+    TError,
+    { data: BodyType<SmsSendBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof smsSend>>,
+  TError,
+  { data: BodyType<SmsSendBody> },
+  TContext
+> => {
+  return useMutation(getSmsSendMutationOptions(options));
+};

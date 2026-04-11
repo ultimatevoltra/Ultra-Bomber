@@ -8,9 +8,28 @@
 import * as zod from "zod";
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
+});
+
+/**
+ * @summary Send SMS to phone via all APIs
+ */
+export const SmsSendBody = zod.object({
+  phone: zod.string(),
+  amount: zod.number(),
+});
+
+export const SmsSendResponse = zod.object({
+  results: zod.array(
+    zod.object({
+      name: zod.string(),
+      success: zod.boolean(),
+    }),
+  ),
+  successCount: zod.number(),
+  failCount: zod.number(),
+  totalApis: zod.number(),
 });

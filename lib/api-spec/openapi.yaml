@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: API specification
@@ -10,13 +9,14 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: sms
+    description: SMS operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +24,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /sms/send:
+    post:
+      operationId: smsSend
+      tags: [sms]
+      summary: Send SMS to phone via all APIs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmsSendBody"
+      responses:
+        "200":
+          description: Results from all API attempts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmsSendResult"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +51,41 @@ components:
           type: string
       required:
         - status
-
+    SmsSendBody:
+      type: object
+      properties:
+        phone:
+          type: string
+        amount:
+          type: integer
+      required:
+        - phone
+        - amount
+    ApiResult:
+      type: object
+      properties:
+        name:
+          type: string
+        success:
+          type: boolean
+      required:
+        - name
+        - success
+    SmsSendResult:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiResult"
+        successCount:
+          type: integer
+        failCount:
+          type: integer
+        totalApis:
+          type: integer
+      required:
+        - results
+        - successCount
+        - failCount
+        - totalApis

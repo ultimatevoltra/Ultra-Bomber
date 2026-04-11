@@ -6,7 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export * from "./apiResult";
-export * from "./healthStatus";
-export * from "./smsSendBody";
-export * from "./smsSendResult";
+export interface ApiResult {
+  name: string;
+  success: boolean;
+}

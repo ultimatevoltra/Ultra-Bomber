@@ -5,19 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
-
-export interface SmsSendBody {
-  phone: string;
-  amount: number;
-}
-
-export interface ApiResult {
-  name: string;
-  success: boolean;
-}
+import type { ApiResult } from "./apiResult";
 
 export interface SmsSendResult {
   results: ApiResult[];
