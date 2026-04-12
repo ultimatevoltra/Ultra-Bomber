@@ -133,7 +133,7 @@ export default function Home() {
           fontSize: 34, textAlign: "center", marginTop: 0, marginBottom: 20,
           color: "#00ffbf", fontWeight: 700, textShadow: "0 0 12px #00ffbf",
         }}>
-          ☠️ Ultra Bomber ☠️
+          ☠️ SMS Bomber counter ☠️
         </h3>
 
         <label style={{ color: "#7fffe0", fontSize: 14, display: "block", marginBottom: 6 }}>
